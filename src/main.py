@@ -4,16 +4,15 @@ from process_functions import *
 from blocks import *
 import os, shutil
 from constants import *
+import sys
 
 def main():
+    if sys.argv != "":
+        basepath = "./"
+    else:
+        basepath = sys.argv[0]
     copy_site_content_to(PUBLIC_DIRECTORY)
-    #generate_site_map(SITE_PAGES)
-    #generate_page("./content/index.md","./template.html","./public/index.html")
-    #generate_page("./content/blog/glorfindel/index.md","./template.html","./public/blog/glorfindel.html")
-    #generate_page("./content/blog/tom/index.md","./template.html","./public/blog/tom.html")
-    #generate_page("./content/blog/majesty/index.md","./template.html","./public/blog/majesty.html")
-    #generate_page("./content/contact/index.md","./template.html","./public/contact/index.html")
-    generate_pages_recursive(SITE_PAGES, "./template.html", PUBLIC_DIRECTORY)
+    generate_pages_recursive(basepath, SITE_PAGES, "./template.html", PUBLIC_DIRECTORY)
 
 def generate_site_map(content_folder): #incomplete
     if os.path.exists(content_folder):
@@ -55,7 +54,7 @@ def copy_site_content_to(final_directory_path):
         os.mkdir(final_directory_path)
     copy_folder_content(SITE_CONTENT, os.listdir(SITE_CONTENT), PUBLIC_DIRECTORY)
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(basepath, dir_path_content, template_path, dest_dir_path):
     dir_list = os.listdir(dir_path_content)
     for item in dir_list:
         path = os.path.join(dir_path_content, item)
@@ -70,38 +69,15 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
             page_title = extract_title(content)
             updated_template = template.replace("{{ Title }}", page_title)
             updated_template = updated_template.replace("{{ Content }}", html_string)
+            updated_template = updated_template.replace('href="/', 'href="{basepath}')
+            updated_template = updated_template.replace('src="/', 'src="{basepath}')
             new_path = new_path.replace(".md", ".html")
             with open(new_path, "w") as file:
                 file.write(updated_template)
         else:
             if os.path.exists(new_path) == False:
                 os.mkdir(new_path)
-            generate_pages_recursive(path, template_path, new_path)
-
-            
-
-def generate_page(from_path, template_path, dest_path):
-    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
-    with open(from_path, "r") as file:
-        content = file.read()
-    with open(template_path, "r") as file:
-        template = file.read()
-    html_string = markdown_to_html_node(content).to_html()
-    page_title = extract_title(content)
-    updated_template = template.replace("{{ Title }}", page_title)
-    updated_template = updated_template.replace("{{ Content }}", html_string)
-    file_name = dest_path.split("/")
-    if os.path.exists("/".join(file_name[:-1])): #needs modification to work with any depth of folders?
-        with open(dest_path, "w") as file:
-            file.write(updated_template)
-    else:
-        path = "./"
-        for dir in file_name[:-1]:
-            path = os.path.join(path, dir)
-            if os.path.exists(path) == False:
-                os.mkdir(path)
-        with open(dest_path, "w") as file:
-            file.write(updated_template)        
+            generate_pages_recursive(basepath, path, template_path, new_path)
 
 if __name__ == "__main__":
     main()
