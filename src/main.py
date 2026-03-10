@@ -8,19 +8,12 @@ import sys
 
 def main():
     if sys.argv != "":
-        basepath = "./"
+        basepath = "/"
     else:
         basepath = sys.argv[0]
+    print("TEST", basepath)
     copy_site_content_to(PUBLIC_DIRECTORY)
     generate_pages_recursive(basepath, SITE_PAGES, "./template.html", PUBLIC_DIRECTORY)
-
-def generate_site_map(content_folder): #incomplete
-    if os.path.exists(content_folder):
-        site_map = os.listdir(content_folder)
-
-    else:
-        os.mkdir(content_folder)
-        raise Exception(f"No site pages exist in {content_folder}")
 
 def delete_folder_content(directory_path, content_list):
     if len(content_list) > 0:
@@ -69,8 +62,8 @@ def generate_pages_recursive(basepath, dir_path_content, template_path, dest_dir
             page_title = extract_title(content)
             updated_template = template.replace("{{ Title }}", page_title)
             updated_template = updated_template.replace("{{ Content }}", html_string)
-            updated_template = updated_template.replace('href="/', 'href="{basepath}')
-            updated_template = updated_template.replace('src="/', 'src="{basepath}')
+            updated_template = updated_template.replace('href="/', f'href="{basepath}')
+            updated_template = updated_template.replace('src="/', f'src="{basepath}')
             new_path = new_path.replace(".md", ".html")
             with open(new_path, "w") as file:
                 file.write(updated_template)
