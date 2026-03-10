@@ -7,10 +7,10 @@ from constants import *
 import sys
 
 def main():
-    if sys.argv != "":
-        basepath = "/"
+    if len(sys.argv) > 1:
+        basepath = sys.argv[1]
     else:
-        basepath = sys.argv[0]
+        basepath = "/"
     print("TEST", basepath)
     copy_site_content_to(PUBLIC_DIRECTORY)
     generate_pages_recursive(basepath, SITE_PAGES, "./template.html", PUBLIC_DIRECTORY)
